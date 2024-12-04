@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>Netflix Analysis</title>
+</head>
+<body>
+    <h1>Netflix Data Analysis</h1>
+    <img src="/static/genres.png" alt="Genres">
+    <img src="/static/ratings.png" alt="Ratings">
+    <img src="/static/trend.png" alt="Trends">
+    
+    <form method="GET" action="{% url 'filter' %}">
+        <label for="year">Year:</label>
+        <input type="text" id="year" name="year">
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre">
+        <button type="submit">Filter</button>
+    </form>
+
+    {% if content %}
+        <ul>
+            {% for item in content %}
+                <li>{{ item.title }} ({{ item.release_year }})</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
