@@ -63,8 +63,8 @@ function App() {
     axios
       .get("http://127.0.0.1:8000/all_data/", {
         params: {
-          year: "2020", // or a selected year
-          genre: "Action", // or a selected genre
+          year: "", // Default no year filter
+          genre: "", // Default no genre filter
         },
       })
       .then((response) => {
@@ -75,7 +75,7 @@ function App() {
             {
               label: "Total Shows by Year (All Data)",
               data: response.data.barChartData, // Total shows per year (all years)
-              backgroundColor: "rgba(75, 192, 192, 0.6)",
+              backgroundColor: "rgba(75, 192, 192, 0.6)", // Light color for all years
             },
           ],
         });
@@ -88,15 +88,16 @@ function App() {
   // Function to handle filter and update the graph
   const filterContent = () => {
     axios
-      .get("http://127.0.0.1:8000/filter/", {
+      .get("http://127.0.0.1:8000/all_data/", {
         params: { year: selectedYear, genre: selectedGenre },
       })
       .then((response) => {
+        // Extract filtered and all data
+        const filteredBarData = response.data.barChartData;
+        const allBarData = response.data.barChartDataAll;
+
+        // Set the content based on the filter
         setContent(response.data.content);
-        setFilteredData({
-          labels: response.data.barChartLabels, // Filtered years
-          data: response.data.barChartData, // Filtered data (total shows per filtered year)
-        });
 
         // Update the graph with both the overall and filtered data
         setBarChartData({
@@ -104,12 +105,12 @@ function App() {
           datasets: [
             {
               label: "Total Shows by Year (All Data)",
-              data: response.data.barChartDataAll, // All shows data (for all years)
+              data: allBarData, // All shows data (for all years)
               backgroundColor: "rgba(75, 192, 192, 0.6)", // Light color for all years
             },
             {
               label: "Filtered Total Shows",
-              data: response.data.barChartData, // Filtered data
+              data: filteredBarData, // Filtered data
               backgroundColor: "rgba(255, 99, 132, 0.6)", // Highlighted color for filtered data
             },
           ],
@@ -166,11 +167,15 @@ function App() {
           style={{ padding: "8px 12px", fontSize: "16px" }}
         >
           <option value="">Select Year</option>
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
+          {years && years.length > 0 ? (
+            years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))
+          ) : (
+            <option disabled>No years available</option>
+          )}
         </select>
 
         {/* Dropdown for selecting genre */}
@@ -259,7 +264,8 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {content.map((item) => (
+            {content && content.length > 0 ? (
+              content.map((item) => (
                 <tr key={item.title}>
                   <td style={{ padding: "8px", border: "1px solid #ddd" }}>
                     {item.title}
@@ -274,10 +280,17 @@ function App() {
                     {item.rating}
                   </td>
                   <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.listed_in}
+                    {item.genres.join(", ")}
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ padding: "10px", textAlign: "center" }}>
+                  No content available
+                </td>
+              </tr>
+            )}
             </tbody>
           </table>
         </div>
@@ -286,4 +299,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from .models import NetflixContent
 from .data_analysis import create_visualizations, load_data, clean_data
+from django.db.models import Count
 
 def home(request):
     # Create visualizations
@@ -30,3 +31,41 @@ def filter_content(request):
     content_data = list(queryset.values('title', 'type', 'release_year', 'rating', 'listed_in'))
 
     return JsonResponse({'content': content_data})
+
+def get_available_years(request):
+    """
+    Returns a list of unique years available in the dataset.
+    """
+    years = NetflixContent.objects.values_list('release_year', flat=True).distinct().order_by('release_year')
+    return JsonResponse({"years": list(years)})
+
+def all_data(request):
+    # Get filter parameters from the request
+    year = request.GET.get('year')
+    genre = request.GET.get('genre')
+
+    # Start with a base queryset that includes all content
+    queryset = NetflixContent.objects.all()
+
+    # Apply filters if specified
+    if year:
+        queryset = queryset.filter(release_year=year)
+    if genre:
+        queryset = queryset.filter(listed_in__icontains=genre)
+
+    # Query the database to get the total number of shows per year, after filtering
+    shows_per_year = queryset.values('release_year').annotate(total_shows=Count('id')).order_by('release_year')
+
+    # Extract the years and counts for the chart
+    bar_chart_labels = [str(show['release_year']) for show in shows_per_year]
+    bar_chart_data = [show['total_shows'] for show in shows_per_year]
+
+    # If you need data for all years (even those with no shows), you can fill in the missing years
+    # For now, we'll assume no missing years in the dataset.
+
+    data = {
+        'barChartLabels': bar_chart_labels,
+        'barChartData': bar_chart_data,
+        'barChartDataAll': bar_chart_data,  # You can modify this as per your needs
+    }
+    return JsonResponse(data)
