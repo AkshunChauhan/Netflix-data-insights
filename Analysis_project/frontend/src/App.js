@@ -1,170 +1,96 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
-// Registering Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// Register necessary Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-function App() {
-  const [content, setContent] = useState([]);
+const App = () => {
+  const [contentData, setContentData] = useState([]);
   const [years, setYears] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("");
-  const [genreGraph, setGenreGraph] = useState("");
-  const [ratingsGraph, setRatingsGraph] = useState("");
-  const [trendGraph, setTrendGraph] = useState("");
-  const [barChartData, setBarChartData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [filteredData, setFilteredData] = useState(null); // Store filtered data for highlighting
+  const [chartData, setChartData] = useState(null);
+  const [yearFilter, setYearFilter] = useState('');
+  const [genreFilter, setGenreFilter] = useState('');
 
-  // Fetch data when the component mounts
+  // Fetch available years for filtering (only on initial load)
   useEffect(() => {
-    // Fetch available years
-    axios
-      .get("http://127.0.0.1:8000/years/")
-      .then((response) => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/years/');
         setYears(response.data.years);
-      })
-      .catch((error) => {
-        console.error("Error fetching years:", error);
-      });
+      } catch (error) {
+        console.error('Error fetching years:', error);
+      }
+    };
+    fetchAvailableYears();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-    // Fetch initial graphs
-    axios
-      .get("http://127.0.0.1:8000/")
-      .then((response) => {
-        setGenreGraph(response.data.genres_graph);
-        setRatingsGraph(response.data.ratings_graph);
-        setTrendGraph(response.data.trend_graph);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-
-    // Fetch data for all years by default
-    axios
-      .get("http://127.0.0.1:8000/all_data/", {
+  // Fetch content data based on filters
+  const fetchContentData = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/filter/', {
         params: {
-          year: "2020", // or a selected year
-          genre: "Action", // or a selected genre
+          year: yearFilter,
+          genre: genreFilter,
         },
-      })
-      .then((response) => {
-        // Setup initial data for all years
-        setBarChartData({
-          labels: response.data.barChartLabels, // All years
-          datasets: [
-            {
-              label: "Total Shows by Year (All Data)",
-              data: response.data.barChartData, // Total shows per year (all years)
-              backgroundColor: "rgba(75, 192, 192, 0.6)",
-            },
-          ],
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching all data:", error);
       });
-  }, []);
+      setContentData(response.data.content);
+    } catch (error) {
+      console.error('Error fetching content data:', error);
+    }
+  };
 
-  // Function to handle filter and update the graph
-  const filterContent = () => {
-    axios
-      .get("http://127.0.0.1:8000/filter/", {
-        params: { year: selectedYear, genre: selectedGenre },
-      })
-      .then((response) => {
-        setContent(response.data.content);
-        setFilteredData({
-          labels: response.data.barChartLabels, // Filtered years
-          data: response.data.barChartData, // Filtered data (total shows per filtered year)
-        });
-
-        // Update the graph with both the overall and filtered data
-        setBarChartData({
-          labels: response.data.barChartLabels, // Filtered years
-          datasets: [
-            {
-              label: "Total Shows by Year (All Data)",
-              data: response.data.barChartDataAll, // All shows data (for all years)
-              backgroundColor: "rgba(75, 192, 192, 0.6)", // Light color for all years
-            },
-            {
-              label: "Filtered Total Shows",
-              data: response.data.barChartData, // Filtered data
-              backgroundColor: "rgba(255, 99, 132, 0.6)", // Highlighted color for filtered data
-            },
-          ],
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching filtered content:", error);
+  // Fetch all data for the bar chart
+  const fetchAllData = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/all_data/', {
+        params: {
+          year: yearFilter,
+          genre: genreFilter,
+        },
       });
+      const data = response.data;
+      setChartData({
+        labels: data.barChartLabels,
+        datasets: [
+          {
+            label: 'Number of Shows',
+            data: data.barChartData,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('Error fetching all data for chart:', error);
+    }
+  };
+
+  // Handle filter changes
+  const handleYearChange = (event) => {
+    setYearFilter(event.target.value);
+  };
+
+  const handleGenreChange = (event) => {
+    setGenreFilter(event.target.value);
+  };
+
+  // Handle filter button click
+  const handleFilterClick = () => {
+    fetchContentData();
+    fetchAllData();
   };
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center" }}>Netflix Content</h1>
+    <div className="App">
+      <h1>Netflix Content Data</h1>
 
-      {/* Graphs */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
-        <img
-          src={genreGraph}
-          alt="Genre Graph"
-          style={{ maxWidth: "300px", height: "auto" }}
-        />
-        <img
-          src={ratingsGraph}
-          alt="Ratings Graph"
-          style={{ maxWidth: "300px", height: "auto" }}
-        />
-        <img
-          src={trendGraph}
-          alt="Trend Graph"
-          style={{ maxWidth: "300px", height: "auto" }}
-        />
-      </div>
-
-      {/* Filter Section */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
-        {/* Dropdown for selecting year */}
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-          style={{ padding: "8px 12px", fontSize: "16px" }}
-        >
+      {/* Filter Options */}
+      <div className="filter-container" style={styles.filterContainer}>
+        <label htmlFor="year-filter">Filter by Year:</label>
+        <select id="year-filter" value={yearFilter} onChange={handleYearChange} style={styles.select}>
           <option value="">Select Year</option>
           {years.map((year) => (
             <option key={year} value={year}>
@@ -173,117 +99,152 @@ function App() {
           ))}
         </select>
 
-        {/* Dropdown for selecting genre */}
-        <select
-          value={selectedGenre}
-          onChange={(e) => setSelectedGenre(e.target.value)}
-          style={{ padding: "8px 12px", fontSize: "16px" }}
-        >
-          <option value="">Select Genre</option>
-          <option value="Action">Action</option>
-          <option value="Comedy">Comedy</option>
-          <option value="Drama">Drama</option>
-          {/* Add more genres as needed */}
-        </select>
-
-        {/* Button to apply filters */}
-        <button
-          onClick={filterContent}
-          style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
-        >
-          Filter Content
-        </button>
-      </div>
-
-      {/* Bar Chart for Total Shows per Year */}
-      <div style={{ marginTop: "40px" }}>
-        <h2>Total Shows per Year</h2>
-        <Bar
-          data={barChartData}
-          options={{
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: "Total Shows per Year",
-              },
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: "Year",
-                },
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: "Total Shows",
-                },
-              },
-            },
-          }}
+        <label htmlFor="genre-filter">Filter by Genre:</label>
+        <input
+          type="text"
+          id="genre-filter"
+          value={genreFilter}
+          onChange={handleGenreChange}
+          placeholder="Enter Genre"
+          style={styles.input}
         />
+        
+        {/* Filter Button */}
+        <button onClick={handleFilterClick} style={styles.button}>Filter</button>
       </div>
 
-      {/* Table to display filtered content */}
-      <div>
-        <h2>Filtered Content</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              minWidth: "500px",
+      {/* Bar Chart */}
+      <h2>Content by Year</h2>
+      {chartData && (
+        <div style={styles.chartContainer}>
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Number of Shows per Year',
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (tooltipItem) {
+                      return tooltipItem.raw + ' shows';
+                    },
+                  },
+                },
+              },
             }}
-          >
-            <thead>
-              <tr>
-                <th style={{ padding: "10px", border: "1px solid #ddd" }}>
-                  Title
-                </th>
-                <th style={{ padding: "10px", border: "1px solid #ddd" }}>
-                  Type
-                </th>
-                <th style={{ padding: "10px", border: "1px solid #ddd" }}>
-                  Release Year
-                </th>
-                <th style={{ padding: "10px", border: "1px solid #ddd" }}>
-                  Rating
-                </th>
-                <th style={{ padding: "10px", border: "1px solid #ddd" }}>
-                  Genres
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {content.map((item) => (
-                <tr key={item.title}>
-                  <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.title}
-                  </td>
-                  <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.type}
-                  </td>
-                  <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.release_year}
-                  </td>
-                  <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.rating}
-                  </td>
-                  <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                    {item.listed_in}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          />
         </div>
+      )}
+
+      {/* Visualizations - Images */}
+      <div className="visualizations" style={styles.visualizations}>
+        <img src="http://127.0.0.1:8000/static/genres.png" alt="Top Genres Visualization" style={styles.image} />
+        <img src="http://127.0.0.1:8000/static/ratings.png" alt="Content Ratings Visualization" style={styles.image} />
+        <img src="http://127.0.0.1:8000/static/trend.png" alt="Content Addition Trend" style={styles.image} />
       </div>
+
+      {/* Content Table */}
+      <h2>Filtered Content</h2>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Release Year</th>
+            <th>Rating</th>
+            <th>Genre</th>
+          </tr>
+        </thead>
+        <tbody>
+          {contentData.map((item, index) => (
+            <tr key={index}>
+              <td>{item.title}</td>
+              <td>{item.type}</td>
+              <td>{item.release_year}</td>
+              <td>{item.rating}</td>
+              <td>{item.listed_in}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
 
-export default App; 
+// Inline styles in JavaScript object format
+const styles = {
+  filterContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: '20px',
+  },
+  select: {
+    margin: '10px',
+    padding: '10px',
+    fontSize: '1rem',
+    minWidth: '200px',
+  },
+  input: {
+    margin: '10px',
+    padding: '10px',
+    fontSize: '1rem',
+    minWidth: '200px',
+  },
+  button: {
+    margin: '10px',
+    padding: '10px',
+    fontSize: '1rem',
+    cursor: 'pointer',
+  },
+  chartContainer: {
+    width: '100%',
+    maxWidth: '1000px',
+    margin: 'auto',
+  },
+  visualizations: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: '20px',
+    marginBottom: '30px',
+    maxWidth: '100%',
+    overflowX: 'auto',
+  },
+  image: {
+    width: '30%',
+    maxWidth: '600px',
+    height: 'auto',
+    margin: '10px 0',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    margin: '20px 0',
+  },
+};
+
+// Add media queries for responsiveness
+const mediaQueryStyles = {
+  '@media (max-width: 768px)': {
+    filterContainer: {
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    visualizations: {
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    image: {
+      width: '80%',
+    },
+    chartContainer: {
+      width: '90%',
+    },
+  },
+};
+
+export default App;

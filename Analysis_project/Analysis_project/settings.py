@@ -29,9 +29,7 @@ ALLOWED_HOSTS = []
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend/build/static'),
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 # Application definition
 
 INSTALLED_APPS = [
