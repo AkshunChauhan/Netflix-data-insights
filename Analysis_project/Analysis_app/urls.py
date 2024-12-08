@@ -21,5 +21,9 @@ urlpatterns = [
     path('type_data/', views.type_data, name='type_data'),  # API to fetch content count grouped by type (e.g., Movie, TV Show)
 
     path('matplotlib_chart/', views.matplotlib_chart, name='matplotlib_chart'),
+    
+    path('api/most_common_genres/', views.most_common_genres, name='most_common_genres'),
+    path('api/content_by_ratings/', views.content_by_ratings, name='content_by_ratings'),
+    # path('api/additions_trend/', views.additions_trend, name='additions_trend'),
 ]
 

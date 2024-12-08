@@ -175,3 +175,49 @@ def matplotlib_chart(request):
 
     # Return the chart as a JSON response
     return JsonResponse({'chart': chart_base64})
+
+def most_common_genres(request):
+    """
+    Get the most common genres on Netflix.
+    """
+    try:
+        genres = (
+            NetflixContent.objects.values_list('listed_in', flat=True)
+            .exclude(listed_in__isnull=True)
+        )
+        genre_counts = {}
+        for genre_list in genres:
+            for genre in map(str.strip, genre_list.split(',')):
+                genre_counts[genre] = genre_counts.get(genre, 0) + 1
+        sorted_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+        return JsonResponse({"genres": sorted_genres})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
+
+def content_by_ratings(request):
+    """
+    Get the distribution of content by ratings.
+    """
+    try:
+        ratings = (
+            NetflixContent.objects.values('rating')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        return JsonResponse({"ratings": list(ratings)})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
+
+# def additions_trend(request):
+#     """
+#     Get the trend of additions over the years.
+#     """
+#     try:
+#         trend = (
+#             NetflixContent.objects.values('release_year')
+#             .annotate(count=Count('id'))
+#             .order_by('release_year')
+#         )
+#         return JsonResponse({"trend": list(trend)})
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)})

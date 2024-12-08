@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Typography, Box, useTheme } from '@mui/material';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
 
 // Register necessary Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
-const ChartDisplay = ({ chartData }) => {
+const ChartDisplay = ({ chartData, trendData }) => {
   const theme = useTheme();
   const chartRef = useRef(null); // Reference to the chart instance
 
@@ -22,14 +22,6 @@ const ChartDisplay = ({ chartData }) => {
         font: {
           size: 20,
           weight: 'bold',
-        },
-      },
-      legend: {
-        labels: {
-          color: theme.palette.text.primary,
-          font: {
-            size: 14,
-          },
         },
       },
       tooltip: {
@@ -67,36 +59,53 @@ const ChartDisplay = ({ chartData }) => {
     },
   };
 
-  // Apply gradient to the chart
-  const getGradient = () => {
-    const chart = chartRef.current;
-    if (!chart) return null;
-
-    const ctx = chart.ctx;
-    const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
-    gradient.addColorStop(0, 'rgba(75, 192, 192, 0.6)');
-    gradient.addColorStop(1, 'rgba(75, 192, 192, 0.2)');
-    return gradient;
+  // Generate unique colors for each bar
+  const generateColors = (count) => {
+    const colors = [
+      'rgba(75, 192, 192, 0.8)',
+      'rgba(255, 99, 132, 0.8)',
+      'rgba(54, 162, 235, 0.8)',
+      'rgba(255, 206, 86, 0.8)',
+      'rgba(153, 102, 255, 0.8)',
+      'rgba(255, 159, 64, 0.8)',
+    ];
+    return Array.from({ length: count }, (_, i) => colors[i % colors.length]);
   };
 
   const updatedChartData = chartData
     ? {
         ...chartData,
-        datasets: chartData.datasets.map((dataset) => ({
-          ...dataset,
-          backgroundColor: getGradient(), // Use the gradient as the background color
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1,
-          borderRadius: 10,
-          barThickness: 20,
-        })),
+        datasets: [
+          // Bar chart dataset
+          {
+            ...chartData.datasets[0],
+            backgroundColor: generateColors(chartData.datasets[0].data.length), // Use dynamic colors
+            borderColor: 'rgba(0, 0, 0, 0.1)',
+            borderWidth: 1,
+            borderRadius: 5,
+            barThickness: 30, // Set bar thickness
+          },
+          // Line chart dataset (trend line)
+          {
+            type: 'line',
+            label: 'Trend Line',
+            data: chartData.datasets[0].data, // Use bar data for the line
+            fill: false,
+            borderColor: 'rgba(255, 159, 64, 1)', // Color of the trend line
+            borderWidth: 2,
+            tension: 0.4, // Controls the smoothness of the line
+            pointRadius: 3, // Size of points on the line
+            pointBackgroundColor: 'rgba(255, 159, 64, 1)', // Point color
+            pointBorderColor: 'rgba(255, 159, 64, 1)', // Point border color
+            borderJoinStyle: 'round', // Ensure smooth connection
+          },
+        ],
       }
     : null;
 
   return (
-    <Box sx={{ marginTop: 0, height: '400px' }}>
+    <Box sx={{ marginTop: 2, height: '500px' }}>
       <Typography variant="h6" sx={{ color: theme.palette.text.primary, marginBottom: 2 }}>
-        Content by Year
       </Typography>
       {updatedChartData && (
         <Bar

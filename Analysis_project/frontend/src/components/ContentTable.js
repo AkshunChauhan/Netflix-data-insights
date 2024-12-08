@@ -27,7 +27,7 @@ const ContentTable = ({ contentData }) => {
   };
 
   return (
-    <Box sx={{ marginTop: 8, color: theme.palette.text.primary }}>
+    <Box sx={{ marginTop: 2, color: theme.palette.text.primary }}>
       <Typography variant="h6">Filtered Content</Typography>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer sx={{ maxHeight: 440 }}>

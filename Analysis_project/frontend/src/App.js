@@ -7,6 +7,7 @@ import ChartDisplay from "./components/ChartDisplay";
 import PieChartDisplay from "./components/PieChartDisplay";
 import Visualizations from "./components/Visualizations";
 import ContentTable from "./components/ContentTable";
+import QuestionsAnswers from "./components/QuestionsAnswers";
 
 const App = () => {
   const [contentData, setContentData] = useState([]);
@@ -198,6 +199,7 @@ const App = () => {
                 sx={{ height: 100, width: 100 }} // Control size of the chart
               />
             </Box>
+              <QuestionsAnswers />
           </Grid>
 
           {/* Center Section (Filters, Bar Chart, Matplotlib Chart, and Table) */}
