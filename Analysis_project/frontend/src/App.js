@@ -17,6 +17,7 @@ const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [countryData, setCountryData] = useState(null);
   const [typeData, setTypeData] = useState(null);
+  const [matplotlibChart, setMatplotlibChart] = useState(null); // State for Matplotlib chart
 
   // Fetch available years for filtering (only on initial load)
   useEffect(() => {
@@ -139,6 +140,21 @@ const App = () => {
     fetchTypeData();
   }, [yearFilter]);
 
+  // Fetch Matplotlib chart based on filters
+  const fetchMatplotlibChart = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/matplotlib_chart/", {
+        params: {
+          year: yearFilter,
+          genre: genreFilter,
+        },
+      });
+      setMatplotlibChart(`data:image/png;base64,${response.data.chart}`);
+    } catch (error) {
+      console.error("Error fetching Matplotlib chart:", error);
+    }
+  };
+
   // Handle filter changes
   const handleYearChange = (event) => setYearFilter(event.target.value);
   const handleGenreChange = (event) => setGenreFilter(event.target.value);
@@ -147,6 +163,7 @@ const App = () => {
   const handleFilterClick = () => {
     fetchContentData();
     fetchAllData();
+    fetchMatplotlibChart(); // Fetch the Matplotlib chart
   };
 
   // Create the theme based on the mode
@@ -183,7 +200,7 @@ const App = () => {
             </Box>
           </Grid>
 
-          {/* Center Section (Filters, Bar Chart, and Table) */}
+          {/* Center Section (Filters, Bar Chart, Matplotlib Chart, and Table) */}
           <Grid item xs={12} md={6}>
             <DarkModeSwitch darkMode={darkMode} setDarkMode={setDarkMode} />
             <Filters
@@ -196,6 +213,13 @@ const App = () => {
             />
             {/* Bar Chart */}
             <ChartDisplay chartData={chartData} />
+            {/* Matplotlib Chart */}
+            {/* {matplotlibChart && (
+              <Box>
+                <h3>Matplotlib Chart</h3>
+                <img src={matplotlibChart} alt="Matplotlib Chart" style={{ width: "100%" }} />
+              </Box>
+            )} */}
             {/* Content Table */}
             <ContentTable contentData={contentData} />
           </Grid>

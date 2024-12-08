@@ -5,7 +5,7 @@ from pathlib import Path
 from .models import NetflixContent
 import logging
 import matplotlib
-matplotlib.use("Agg")  # Use non-GUI backend
+matplotlib.use("Agg")
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
