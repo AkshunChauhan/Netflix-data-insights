@@ -72,8 +72,18 @@ def all_data(request):
     return JsonResponse(data)
 
 def country_data(request):
+    # Get the year filter from the request
+    year = request.GET.get('year')
+
+    # Start with a base queryset that includes all content
+    queryset = NetflixContent.objects.all()
+
+    # Apply the year filter if specified
+    if year:
+        queryset = queryset.filter(release_year=year)
+
     # Query the count of content per country, leaving 'null' values as they are
-    country_counts = NetflixContent.objects.values('country') \
+    country_counts = queryset.values('country') \
         .annotate(count=Count('id')) \
         .order_by('-count')
 
@@ -85,11 +95,21 @@ def country_data(request):
 
 
 def type_data(request):
-    """
-    Returns a pie chart dataset for content distribution by type (e.g., Movie, TV Show).
-    """
+    # Get the year filter from the request
+    year = request.GET.get('year')
+
+    # Start with a base queryset that includes all content
+    queryset = NetflixContent.objects.all()
+
+    # Apply the year filter if specified
+    if year:
+        queryset = queryset.filter(release_year=year)
+
     # Query the count of content per type
-    type_counts = NetflixContent.objects.values('type').annotate(count=Count('id')).order_by('-count')
+    type_counts = queryset.values('type') \
+        .annotate(count=Count('id')) \
+        .order_by('-count')
+
     labels = [entry['type'] for entry in type_counts]
     data = [entry['count'] for entry in type_counts]
 

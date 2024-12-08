@@ -9,7 +9,12 @@ const PieChartDisplay = ({ title, pieData }) => {
   const theme = useTheme();
 
   // Check if pieData is null or if it contains empty labels/data
-  const isDataAvailable = pieData && pieData.labels && pieData.labels.length > 0 && pieData.datasets && pieData.datasets[0].data.length > 0;
+  const isDataAvailable =
+    pieData &&
+    pieData.labels &&
+    pieData.labels.length > 0 &&
+    pieData.datasets &&
+    pieData.datasets[0].data.length > 0;
 
   if (!isDataAvailable) {
     return <div>No data available for {title}</div>;
@@ -21,8 +26,8 @@ const PieChartDisplay = ({ title, pieData }) => {
     .sort((a, b) => b.data - a.data)
     .slice(0, 3);
 
-  const topLabels = sortedData.map(item => item.label);
-  const topData = sortedData.map(item => item.data);
+  const topLabels = sortedData.map((item) => item.label);
+  const topData = sortedData.map((item) => item.data);
 
   // Create a new pieData with top 3 entries
   const filteredPieData = {
@@ -37,6 +42,8 @@ const PieChartDisplay = ({ title, pieData }) => {
   };
 
   const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // Disable the default aspect ratio
     plugins: {
       legend: {
         labels: {
@@ -47,11 +54,13 @@ const PieChartDisplay = ({ title, pieData }) => {
   };
 
   return (
-    <Box sx={{ marginTop: 3 }}>
+    <Box sx={{ marginTop: 3, width: '100%', height: '300px' }}> {/* Set container dimensions */}
       <Typography variant="h6" sx={{ color: theme.palette.text.primary, marginBottom: 2 }}>
         {title}
       </Typography>
-      <Pie data={filteredPieData} options={chartOptions} />
+      <Box sx={{ width: '100%', height: '100%' }}> {/* Chart container */}
+        <Pie data={filteredPieData} options={chartOptions} />
+      </Box>
     </Box>
   );
 };

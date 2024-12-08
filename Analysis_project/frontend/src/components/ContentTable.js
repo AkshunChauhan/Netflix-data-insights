@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination } from '@mui/material';
+import { useTheme, Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination } from '@mui/material';
 
 const ContentTable = ({ contentData }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
+  const theme = useTheme();
   // Columns definition
   const columns = [
     { id: 'index', label: 'Index', minWidth: 50 },
@@ -27,7 +27,7 @@ const ContentTable = ({ contentData }) => {
   };
 
   return (
-    <Box sx={{ marginTop: 4 }}>
+    <Box sx={{ marginTop: 8, color: theme.palette.text.primary }}>
       <Typography variant="h6">Filtered Content</Typography>
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer sx={{ maxHeight: 440 }}>

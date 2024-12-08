@@ -2,8 +2,17 @@ import React from 'react';
 import { Button, Select, MenuItem, TextField, FormControl, InputLabel, Box } from '@mui/material';
 
 const Filters = ({ yearFilter, genreFilter, years, handleYearChange, handleGenreChange, handleFilterClick }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 3 }}>
-    <FormControl sx={{ margin: 1, width: 200 }}>
+  <Box 
+    sx={{ 
+      display: 'flex', 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      gap: 2, 
+      marginBottom: 3 
+    }}
+  >
+    <FormControl sx={{ width: 200 }}>
       <InputLabel>Filter by Year</InputLabel>
       <Select value={yearFilter} onChange={handleYearChange}>
         <MenuItem value="">Select Year</MenuItem>
@@ -19,11 +28,11 @@ const Filters = ({ yearFilter, genreFilter, years, handleYearChange, handleGenre
       label="Filter by Genre"
       value={genreFilter}
       onChange={handleGenreChange}
-      sx={{ margin: 1, width: 200 }}
+      sx={{ width: 200 }}
       variant="outlined"
     />
 
-    <Button variant="contained" onClick={handleFilterClick} sx={{ marginTop: 2 }}>
+    <Button variant="contained" onClick={handleFilterClick}>
       Filter
     </Button>
   </Box>
