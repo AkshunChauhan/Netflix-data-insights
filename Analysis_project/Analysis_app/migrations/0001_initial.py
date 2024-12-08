@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
                 ("rating", models.CharField(max_length=50, null=True)),
                 ("duration", models.CharField(max_length=50, null=True)),
                 ("listed_in", models.TextField()),
+                ("country", models.CharField(max_length=255))
             ],
         ),
     ]

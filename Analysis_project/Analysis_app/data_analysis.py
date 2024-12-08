@@ -15,6 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent
 # Ensure the static directory exists for saving visualizations
 (BASE_DIR / 'static').mkdir(exist_ok=True, parents=True)
 
+#from Analysis_app.data_analysis import load_data, clean_data, populate_database, analyze_genres, analyze_ratings, analyze_trend, create_visualizations
+
 def load_data():
     """
     Load the Netflix dataset from the 'netflix_titles.csv' file.
@@ -54,7 +56,8 @@ def populate_database(df):
                 release_year=row['release_year'],
                 rating=row.get('rating'),
                 duration=row.get('duration'),
-                listed_in=row['listed_in']
+                listed_in=row['listed_in'],
+                country=row['country']
             )
             for _, row in df.iterrows()
         ]

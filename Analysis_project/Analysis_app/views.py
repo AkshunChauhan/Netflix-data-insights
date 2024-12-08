@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from .models import NetflixContent
 from .data_analysis import create_visualizations, load_data, clean_data
-from django.db.models import Count
+from django.db.models import Count, Value
+from django.db.models.functions import Coalesce
 
 def home(request):
     # Create visualizations
@@ -69,3 +70,27 @@ def all_data(request):
         'barChartDataAll': bar_chart_data,  # You can modify this as per your needs
     }
     return JsonResponse(data)
+
+def country_data(request):
+    # Query the count of content per country, leaving 'null' values as they are
+    country_counts = NetflixContent.objects.values('country') \
+        .annotate(count=Count('id')) \
+        .order_by('-count')
+
+    # Prepare data for the Pie chart
+    labels = [item['country'] if item['country'] is not None else 'Not Available' for item in country_counts]
+    data = [item['count'] for item in country_counts]
+
+    return JsonResponse({'labels': labels, 'data': data})
+
+
+def type_data(request):
+    """
+    Returns a pie chart dataset for content distribution by type (e.g., Movie, TV Show).
+    """
+    # Query the count of content per type
+    type_counts = NetflixContent.objects.values('type').annotate(count=Count('id')).order_by('-count')
+    labels = [entry['type'] for entry in type_counts]
+    data = [entry['count'] for entry in type_counts]
+
+    return JsonResponse({'labels': labels, 'data': data})
