@@ -10,20 +10,23 @@ This project is a web application that combines a Django backend with a React fr
 
 * The Netflix dataset is loaded and processed using Pandas.
 * Filters are applied to clean and extract meaningful insights.
+* The processed data is stored in an SQLite database.
 
 ### 2. Backend (Django)
 
-* The processed data is stored in an SQLite database.
-* Django serves API endpoints to provide the filtered data to the frontend.
+* The backend is built using Django, serving API endpoints to provide the filtered data to the frontend.
+* API endpoints include the most common genres, content distribution by ratings, and the trend of additions over the years.
 
 ### 3. Frontend (React)
 
-* Built with React and styled with Material-UI for a modern and responsive design.
+* The frontend is built with React and styled with Material-UI for a modern and responsive design.
 * Features an interactive Bar Chart that visualizes the number of Netflix shows released per year.
+* Added a line graph on the bar chart to represent the trend of additions, creating a combined bar-line chart.
 
 ### 4. Dynamic Visualizations
 
 * Users can see graphical representations of the data using Chart.js integrated into React.
+* The combined bar-line chart features dynamic data updates based on user selections, showing the most common genres, the distribution of content by ratings, and yearly additions trends.
 
 ## Technologies Used
 
@@ -35,9 +38,10 @@ This project is a web application that combines a Django backend with a React fr
 
 ### Frontend
 
-* React: For building the user interface.
-* Material-UI: For styling and responsive components.
-* Chart.js: For data visualization.
+* **React**: For building the user interface.
+* **Material-UI**: For styling and responsive components.
+* **Chart.js**: For data visualization.
+* **Axios**: For making API calls to fetch data from the backend.
 
 ## Installation and Setup
 
@@ -71,9 +75,12 @@ This project is a web application that combines a Django backend with a React fr
 
 The Django backend provides the following API endpoints:
 
-* `GET /api/movies`: Returns a list of all movies in the database.
-* `GET /api/tv-shows`: Returns a list of all TV shows in the database.
-* `GET /api/data`: Returns the filtered data used for visualization.
+* `GET /api/most_common_genres/`: Returns the most common genres on Netflix.
+* `GET /api/content_by_ratings/`: Returns the distribution of content by ratings.
+* `GET /api/additions_trend/`: Returns the trend of movie and TV show additions over the years.
+* `GET /api/movies/`: Returns a list of all movies in the database.
+* `GET /api/tv-shows/`: Returns a list of all TV shows in the database.
+* `GET /api/data/`: Returns the filtered data used for visualization.
 
 ## Contributing
 
@@ -84,6 +91,10 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 3. Make your changes and commit them.
 4. Push your branch to your forked repository.
 5. Open a pull request to merge your changes into the main repository.
+
+## Contributors
+
+Developer: Akshun Chauhan (AK)
 
 ## License
 
